@@ -1,34 +1,35 @@
-'''This weeks theme is: ANTIQUE!!
-
-Make something with just a terminal , an 8-bit game, or anything else that makes you think "wow this is really old"'''
-
 import pygame
-pygame.init() #initializes pygame
+pygame.init()
 
-screen = pygame.display.set_mode([600, 600]) #defines size of the screen
+screen = pygame.display.set_mode([600, 600]) 
+bg_image = pygame.image.load('images/back.jpg').convert()
+bg_image = pygame.transform.scale(bg_image, (600, 600))
 
-#Defines basic colors
 red = (255, 0, 0)
 darkred = (80, 0, 0)
 green = (0, 255, 0)
 darkgreen = (0, 99, 15)
-blue = (0, 0, 255)
+playercolor = (148, 16, 69)
 white = (255,255,255)
 black = (0,0,0)
 darktint = pygame.Surface((600, 600))
 darktint.fill((0,0,0))
-darktint.set_alpha(180) #Transparency value, 0 is invisible, 255 is solid, 128 is 50%
-'''
-Changed the plane background for an image that fits the ANTIQUE theme
-'''
-bg_image = pygame.image.load('images/back.jpg').convert()
-bg_image = pygame.transform.scale(bg_image, (600, 600))
+darktint.set_alpha(180) 
 
 timer = pygame.time.Clock()
 framerate = 60
 
 circle_x = 300
 circle_y = 300
+
+player_width = 50
+player_height = 50
+player_x = 300
+player_y = 500
+player_x_direction = 0
+player_y_direction = 0
+player_speed = 7s
+
 
 '''
 Changing either x or y direction changes the speed in that axis
@@ -38,14 +39,31 @@ circle_y_direction = 5
 
 score = 0
 
-font = pygame.font.Font('fonts/Redaction70-Bold.ttf', 30) #In pygame you can't just put text on the screen, you gotta define a font and then render it.
-running = True #Can be any variable, just needs to create a game loop
+font = pygame.font.Font('fonts/Redaction70-Bold.ttf', 30) 
+running = True 
 
-'''
-At this point in the video LeMaster says that this tutorial was made and thinked for
-people with an intermediate level, who already know basics of Python, such as globals... which I don't.
-I'll have to do another Tutorial Series called "Python Basics" after I'm done with this one. Or I could just keep doing pygame and hope for the best.
-'''
+def update_player_position():
+    global player_x
+    global player_y
+    global player_x_direction
+    global player_y_direction
+
+    if player_x_direction > 0:
+        if player_x < 585 - player_width:
+            player_x += player_x_direction * player_speed
+    if player_x_direction < 0:
+        if player_x > 15:
+            player_x += player_x_direction * player_speed
+
+    if player_y_direction > 0:
+        if player_y < 585 - player_height:
+            player_y += player_y_direction * player_speed
+    if player_y_direction < 0:
+        if player_y > 15:
+            player_y += player_y_direction * player_speed
+
+
+
 def update_ball_position():
     global circle_x
     global circle_y 
@@ -83,18 +101,41 @@ def update_ball_position():
         else:
             circle_y_direction *= -1
             score += 1
-    
 
-while running: #Python automatically treats this variable as a boolean with value of True
+
+
+while running: 
     timer.tick(framerate)
     update_ball_position()
+    update_player_position()
 
     for event in pygame.event.get():
-        if event.type == pygame.QUIT: #Checks if the user has quit
+        if event.type == pygame.QUIT: 
             running = False
+
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT or event.key == pygame.K_a:
+                player_x_direction = -1
+            if event.key == pygame.K_RIGHT or event.key == pygame.K_d:
+                player_x_direction = 1
+            if event.key == pygame.K_UP or event.key == pygame.K_w:
+                player_y_direction = -1
+            if event.key == pygame.K_DOWN or event.key == pygame.K_s:
+                player_y_direction = 1
+
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_LEFT or event.key == pygame.K_a:
+                player_x_direction = 0
+            if event.key == pygame.K_RIGHT or event.key == pygame.K_d:
+                player_x_direction = 0
+            if event.key == pygame.K_UP or event.key == pygame.K_w:
+                player_y_direction = 0
+            if event.key == pygame.K_DOWN or event.key == pygame.K_s:
+                player_y_direction = 0
     
-    screen.blit(bg_image, (0,0)) #Fill screen with background
-    screen.blit(darktint, (0,0)) #Adds a dark tint
+    screen.blit(bg_image, (0,0)) 
+    screen.blit(darktint, (0,0)) #
+
     '''
     Draws borders on the screen
     '''
@@ -102,9 +143,12 @@ while running: #Python automatically treats this variable as a boolean with valu
     pygame.draw.rect(screen, darkred, (585, 0, 15, 600))
     pygame.draw.rect(screen, darkred, (0, 0, 600, 15))
     pygame.draw.rect(screen, darkred, (0, 585, 600, 15))
-    display_score = font.render("Score: " + str(score), True, white, black)
+
+
+    display_score = font.render("Score: " + str(score), True, white, black) 
     screen.blit(display_score, (15,15))
-    pygame.draw.circle(screen, (150, 0, 0), (circle_x, circle_y), 30) #draws a circle, obviously
+    pygame.draw.circle(screen, (150, 0, 0), (circle_x, circle_y), 30) #Killer ball
+    pygame.draw.rect(screen, playercolor, (player_x, player_y, player_width, player_height))  #Player
 
     pygame.display.flip()
 
