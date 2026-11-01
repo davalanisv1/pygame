@@ -28,19 +28,37 @@ player_x = 300
 player_y = 500
 player_x_direction = 0
 player_y_direction = 0
-player_speed = 7s
+player_speed = 7
 
 
 '''
 Changing either x or y direction changes the speed in that axis
 '''
-circle_x_direction = 7 
-circle_y_direction = 5
+circle_x_direction = 20
+circle_y_direction = 16
 
 score = 0
 
-font = pygame.font.Font('fonts/Redaction70-Bold.ttf', 30) 
+font = pygame.font.Font('fonts/Redaction70-Bold.ttf', 30)
+game_over_font = pygame.font.Font('fonts/Redaction70-Bold.ttf', 60) 
+
 running = True 
+
+def check_coll(playerx, playery, circlex, circley):
+    if abs(playerx - circlex) < 45 and abs(playery - circley) < 45:
+        global player_x_direction
+        global player_y_direction
+        global circle_x_direction
+        global circle_y_direction 
+        player_x_direction = 0
+        player_y_direction = 0
+        circle_x_direction = 0
+        circle_y_direction = 0
+        game_over()
+
+def game_over():
+    display_game_over = game_over_font.render("Game Over", True, (200, 0, 0), black) 
+    screen.blit(display_game_over, (150,150))
 
 def update_player_position():
     global player_x
@@ -61,8 +79,6 @@ def update_player_position():
     if player_y_direction < 0:
         if player_y > 15:
             player_y += player_y_direction * player_speed
-
-
 
 def update_ball_position():
     global circle_x
@@ -147,9 +163,9 @@ while running:
 
     display_score = font.render("Score: " + str(score), True, white, black) 
     screen.blit(display_score, (15,15))
-    pygame.draw.circle(screen, (150, 0, 0), (circle_x, circle_y), 30) #Killer ball
-    pygame.draw.rect(screen, playercolor, (player_x, player_y, player_width, player_height))  #Player
-
+    circle = pygame.draw.circle(screen, (150, 0, 0), (circle_x, circle_y), 30) #Killer ball
+    player = pygame.draw.rect(screen, playercolor, (player_x, player_y, player_width, player_height))  #Player
+    check_coll(player.centerx, player.centery, circle.centerx, circle.centery)
     pygame.display.flip()
 
 pygame.quit()
