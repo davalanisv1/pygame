@@ -1,8 +1,22 @@
 import pygame
 pygame.init()
 
+#-----AI-----
+import sys
+import os
+
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+#-----END OF AI----
+
+
 screen = pygame.display.set_mode([600, 600]) 
-bg_image = pygame.image.load('images/back.jpg').convert()
+bg_image = pygame.image.load(resource_path('images/back.bmp')).convert()
 bg_image = pygame.transform.scale(bg_image, (600, 600))
 
 red = (255, 0, 0)
@@ -18,6 +32,7 @@ darktint.set_alpha(180)
 
 timer = pygame.time.Clock()
 framerate = 60
+gameover = False
 
 circle_x = 300
 circle_y = 300
@@ -34,14 +49,15 @@ player_speed = 7
 '''
 Changing either x or y direction changes the speed in that axis
 '''
-circle_x_direction = 20
-circle_y_direction = 16
+circle_x_direction = 4
+circle_y_direction = 5
 
 score = 0
+prev_score = 0
+high_score = 0
 
-font = pygame.font.Font('fonts/Redaction70-Bold.ttf', 30)
-game_over_font = pygame.font.Font('fonts/Redaction70-Bold.ttf', 60) 
-
+font = pygame.font.Font(resource_path('fonts/Redaction70-Bold.ttf'), 30)
+game_over_font = pygame.font.Font(resource_path('fonts/Redaction70-Bold.ttf'), 60)
 running = True 
 
 def check_coll(playerx, playery, circlex, circley):
@@ -57,8 +73,12 @@ def check_coll(playerx, playery, circlex, circley):
         game_over()
 
 def game_over():
+    global gameover
     display_game_over = game_over_font.render("Game Over", True, (200, 0, 0), black) 
     screen.blit(display_game_over, (150,150))
+    display_restart = font.render("Press R to Restart", True, (200, 100, 100), black) 
+    screen.blit(display_restart, (150,250))
+    gameover = True
 
 def update_player_position():
     global player_x
@@ -93,6 +113,7 @@ def update_ball_position():
         else:
             circle_x_direction *= -1
             score += 1
+            circle_x += 0.5
 
     elif circle_x_direction < 0:
         if circle_x > 45:
@@ -100,6 +121,7 @@ def update_ball_position():
         else:
             circle_x_direction *= -1
             score += 1
+            circle_x += 0.5
 
     '''
     Hypothetically, the code SHOULD be the same, but instead of using x direction, we could use y direction...
@@ -110,6 +132,7 @@ def update_ball_position():
         else:
             circle_y_direction *= -1
             score += 1
+            circle_y += 0.5
 
     elif circle_y_direction < 0:
         if circle_y > 45:
@@ -117,8 +140,7 @@ def update_ball_position():
         else:
             circle_y_direction *= -1
             score += 1
-
-
+            circle_y += 0.5
 
 while running: 
     timer.tick(framerate)
@@ -148,6 +170,19 @@ while running:
                 player_y_direction = 0
             if event.key == pygame.K_DOWN or event.key == pygame.K_s:
                 player_y_direction = 0
+            if event.key == pygame.K_r and gameover:
+                circle_x = 300
+                circle_y = 300
+                circle_x_direction = 4
+                circle_y_direction = 5
+                player_x = 300
+                player_y = 500
+                prev_score = score
+                if score > high_score:
+                    high_score = score
+                score = 0
+                gameover = False
+
     
     screen.blit(bg_image, (0,0)) 
     screen.blit(darktint, (0,0)) #
@@ -163,6 +198,8 @@ while running:
 
     display_score = font.render("Score: " + str(score), True, white, black) 
     screen.blit(display_score, (15,15))
+    display_highscore = font.render("High Score: " + str(high_score), True, white, black) 
+    screen.blit(display_highscore, (15,45))
     circle = pygame.draw.circle(screen, (150, 0, 0), (circle_x, circle_y), 30) #Killer ball
     player = pygame.draw.rect(screen, playercolor, (player_x, player_y, player_width, player_height))  #Player
     check_coll(player.centerx, player.centery, circle.centerx, circle.centery)
