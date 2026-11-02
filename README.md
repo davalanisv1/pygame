@@ -15,3 +15,5 @@ To be honest I only tested it on Arch Linux (I use Arch btw) but I think it shou
 cd Downloads/pygame/dist
 
 ./code
+
+<img width="597" height="598" alt="image" src="https://github.com/user-attachments/assets/d6a05042-0d4a-46fa-83b2-c202485df1ba" />
